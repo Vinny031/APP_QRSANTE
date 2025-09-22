@@ -13,7 +13,7 @@
     <div v-if="activeTab === 'login'" class="form">
       <input type="email" placeholder="Email" />
       <input type="password" placeholder="Password" />
-      <button>Se connecter</button>
+      <button @click="handleLogin">Se connecter</button>
     </div>
 
     <div v-else class="form">
@@ -27,9 +27,15 @@
 
 <script setup>
 import { ref } from 'vue'
-import Header from './Header.vue' // <-- import du composant
+import { useRouter } from 'vue-router'
+import Header from './Header.vue'
 
 const activeTab = ref('login')
+const router = useRouter()
+
+function handleLogin() {
+  router.push('/dashboard') // redirection après login
+}
 </script>
 
 <style scoped>
