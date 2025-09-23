@@ -11,11 +11,12 @@
 
 <style scoped>
 .header {
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 .logo {
   width: 60px;
