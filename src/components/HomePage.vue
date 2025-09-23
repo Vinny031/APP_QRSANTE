@@ -1,15 +1,12 @@
 <template>
   <div class="container">
-    <!-- Import du header -->
     <Header />
 
-    <!-- Tabs -->
     <div class="tabs">
       <button @click="activeTab = 'login'" :class="{ active: activeTab === 'login' }">Login</button>
       <button @click="activeTab = 'signup'" :class="{ active: activeTab === 'signup' }">Sign Up</button>
     </div>
 
-    <!-- Forms -->
     <div v-if="activeTab === 'login'" class="form">
       <input type="email" placeholder="Email" />
       <input type="password" placeholder="Password" />
@@ -46,7 +43,6 @@ function handleLogin() {
   text-align: center;
 }
 
-/* Tabs */
 .tabs {
   display: flex;
   justify-content: space-around;
@@ -65,7 +61,6 @@ button.active {
   color: white;
 }
 
-/* Form */
 .form input {
   display: block;
   width: 100%;
