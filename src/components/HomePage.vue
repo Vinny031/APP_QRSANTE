@@ -17,19 +17,33 @@
       <input type="text" placeholder="Nom complet" />
       <input type="text" placeholder="Prenom" />
       <input type="email" placeholder="Email" />
-      <input type="password" placeholder="Mot de passe" />
+      <div class="password-wrapper">
+        <input
+          :type="showPassword ? 'text' : 'password'"
+          v-model="password"
+          placeholder="Mot de passe"
+        />
+        <button type="button" @click="showPassword = !showPassword" class="toggle-password">
+          <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+        </button>
+      </div>
 
       <button type="button" @click="showProInput = !showProInput">
         Professionnel de santé ?
       </button>
 
       <div v-if="showProInput" class="collapse">
-        <input
-          type="password"
-          placeholder="Ajoute ton RPPS (11 chiffres)"
-          v-model="proNumber"
-          @input="proNumber = proNumber.replace(/\D/g, '').slice(0, 11)"
-        />
+        <div class="rpps-wrapper">
+          <input
+            :type="showProPassword ? 'text' : 'password'"
+            placeholder="Ajoute ton RPPS (11 chiffres)"
+            v-model="proNumber"
+            @input="proNumber = proNumber.replace(/\D/g, '').slice(0, 11)"
+          />
+          <button type="button" @click="showProPassword = !showProPassword" class="toggle-password">
+            <i :class="showProPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
       </div>
 
       <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
@@ -50,6 +64,10 @@ const showProInput = ref(false)
 const proNumber = ref('')
 const errorMessage = ref('')
 
+const password = ref('')
+const showPassword = ref(false)
+const showProPassword = ref(false)
+
 // Connexion simple
 function handleLogin() {
   router.push('/dashboard')
@@ -64,10 +82,11 @@ function handleSignup() {
     return
   }
 
-  // Ici, tu peux ajouter la logique d'inscription (API, stockage, etc.)
+  // Ici, ajouter la logique d'inscription (API, stockage, etc.)
   alert('Inscription réussie !')
 }
 </script>
+
 
 <style scoped>
 .container {
@@ -121,5 +140,38 @@ button.active {
 .error {
   color: red;
   margin-top: 5px;
+}
+
+.password-wrapper,
+.rpps-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.password-wrapper input,
+.rpps-wrapper input {
+  width: 80%;
+  padding: 0 8px;
+  border: none;
+  outline: none;
+  border-radius: 0;
+}
+
+.password-wrapper .toggle-password,
+.rpps-wrapper .toggle-password {
+  width: 20%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 0;
 }
 </style>
