@@ -1,8 +1,6 @@
 <template>
   <div class="container">
     <Header />
-
-    <!-- Onglets -->
     <div class="tabs">
       <button
         @click="activeTab = 'login'"
@@ -17,8 +15,6 @@
         S'enregistrer
       </button>
     </div>
-
-    <!-- Formulaires -->
     <LoginForm v-if="activeTab === 'login'" />
     <SignUpForm v-else :active-tab="activeTab" @switch-to-login="activeTab = 'login'" />
   </div>

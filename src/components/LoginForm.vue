@@ -1,41 +1,37 @@
 <template>
   <div class="form">
-    <input v-model="email" type="email" placeholder="E-mail" />
-    <input
-      v-model="password"
-      :type="showPassword ? 'text' : 'password'"
-      placeholder="Mot de passe"
-    />
-    <button type="button" @click="showPassword = !showPassword" class="toggle-password">
-      <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-    </button>
-
+    <input v-model="email" type="email" placeholder="Email" />
+    <input v-model="password" type="password" placeholder="Mot de passe" />
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-
-    <button @click="handleLogin">Se connecter</button>
+    <button @click="handleLogin" :disabled="!isFormValid">Se connecter</button>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { getUser } from '../db.js'
 
+const router = useRouter()
 const email = ref('')
 const password = ref('')
-const showPassword = ref(false)
 const errorMessage = ref('')
-const router = useRouter()
 
-function handleLogin() {
-  const users = JSON.parse(localStorage.getItem('users') || '[]')
-  const user = users.find(u => u.email === email.value && u.password === password.value)
+const isFormValid = computed(() => email.value.trim() !== '' && password.value.trim() !== '')
 
-  if (!user) {
+async function handleLogin() {
+  errorMessage.value = ''
+  const user = await getUser(email.value.trim())
+
+  if (!user || user.password !== password.value) {
     errorMessage.value = 'Email ou mot de passe incorrect.'
     return
   }
 
-  alert(`Bienvenue ${user.firstName || ''} !`)
+  // Sauvegarde utilisateur connecté pour session offline
+  localStorage.setItem('currentUser', JSON.stringify(user))
+
+  alert(`Bienvenue ${user.firstName} !`)
   router.push('/dashboard')
 }
 </script>
@@ -64,11 +60,9 @@ function handleLogin() {
   border-radius: 10px;
   margin-top: 10px;
 }
-.toggle-password {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin: 5px 0;
+.form button:disabled {
+  background: #999;
+  cursor: not-allowed;
 }
 .error {
   color: red;

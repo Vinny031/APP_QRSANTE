@@ -41,11 +41,9 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, defineProps, defineEmits } from 'vue'
+import { ref, watch, computed, defineEmits } from 'vue'
+import { saveUser, getUser } from '../db.js'
 
-const props = defineProps({
-  activeTab: String
-})
 const emit = defineEmits(['switch-to-login'])
 
 const fullName = ref('')
@@ -61,7 +59,7 @@ const showProPassword = ref(false)
 
 const errorMessage = ref('')
 
-// Vérification password
+// Validation password
 function validatePassword(pw) {
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/
   return regex.test(pw)
@@ -81,7 +79,6 @@ function validateEmail(mail) {
   return regex.test(mail)
 }
 
-// Computed pour bouton
 const isFormValid = computed(() => {
   return (
     fullName.value.trim().length > 1 &&
@@ -92,7 +89,7 @@ const isFormValid = computed(() => {
   )
 })
 
-function handleSignup() {
+async function handleSignup() {
   errorMessage.value = ''
 
   const user = {
@@ -104,33 +101,20 @@ function handleSignup() {
     createdAt: new Date().toISOString(),
   }
 
-  const users = JSON.parse(localStorage.getItem('users') || '[]')
-
-  if (users.find((u) => u.email === user.email)) {
+  const existingUser = await getUser(user.email)
+  if (existingUser) {
     errorMessage.value = 'Cet email est déjà utilisé.'
     return
   }
 
-  users.push(user)
-  localStorage.setItem('users', JSON.stringify(users))
+  await saveUser(user)
 
   alert('Inscription réussie !')
 
-  // 🔹 Reset du formulaire
-  fullName.value = ''
-  firstName.value = ''
-  email.value = ''
-  password.value = ''
-  showPassword.value = false
-  showProInput.value = false
-  proNumber.value = ''
-  showProPassword.value = false
-
-  // 🔹 Retour vers login
+  // Conserver les champs remplis et revenir au login
   emit('switch-to-login')
 }
 </script>
-
 
 <style scoped>
 .form {
