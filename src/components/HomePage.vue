@@ -1,45 +1,62 @@
 <template>
   <div class="container">
     <Header />
-
-    <div class="tabs">
-      <button @click="activeTab = 'login'" :class="{ active: activeTab === 'login' }">Login</button>
-      <button @click="activeTab = 'signup'" :class="{ active: activeTab === 'signup' }">Sign Up</button>
-    </div>
-
-    <div v-if="activeTab === 'login'" class="form">
-      <input type="email" placeholder="Email" />
-      <input type="password" placeholder="Password" />
-      <button @click="handleLogin">Se connecter</button>
-    </div>
-
-    <div v-else class="form">
-      <input type="text" placeholder="Nom complet" />
-      <input type="email" placeholder="Email" />
-      <input type="password" placeholder="Mot de passe" />
-      <button>S’inscrire</button>
-    </div>
+    
+    <main class="content">
+      <div class="tabs">
+        <button
+          @click="activeTab = 'login'"
+          :class="{ active: activeTab === 'login' }"
+        >
+          Se connecter
+        </button>
+        <button
+          @click="activeTab = 'signup'"
+          :class="{ active: activeTab === 'signup' }"
+        >
+          S'enregistrer
+        </button>
+      </div>
+      <LoginForm v-if="activeTab === 'login'" />
+      <SignUpForm
+        v-else
+        :active-tab="activeTab"
+        @switch-to-login="activeTab = 'login'"
+      />
+    </main>
+    
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import Header from './Header.vue'
+import LoginForm from './LoginForm.vue'
+import SignUpForm from './SignUpForm.vue'
+import Footer from './Footer.vue'
 
 const activeTab = ref('login')
-const router = useRouter()
-
-function handleLogin() {
-  router.push('/dashboard') // redirection après login
-}
 </script>
 
 <style scoped>
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 .container {
-  max-width: 400px;
-  margin: auto;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
 }
 
@@ -47,36 +64,21 @@ function handleLogin() {
   display: flex;
   justify-content: space-around;
   margin-bottom: 20px;
+  width: 100%;
+  max-width: 400px;
 }
+
 button {
   padding: 10px;
   border: none;
   cursor: pointer;
   background: #ddd;
-  border-radius: 10px; /* arrondi des angles */
+  border-radius: 10px;
   transition: background 0.3s;
 }
+
 button.active {
   background: #183473;
   color: white;
-}
-
-.form input {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-.form button {
-  width: 100%;
-  padding: 10px;
-  background: #183473;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
-  margin-top: 10px;
 }
 </style>
