@@ -110,6 +110,7 @@ function handleSignup() {
 
 
 <style scoped>
+
 .container {
   max-width: 400px;
   margin: auto;
@@ -137,7 +138,7 @@ button.active {
 
 .form input {
   display: block;
-  width: 100%;
+  width: 95%;
   margin: 10px 0;
   padding: 8px;
   border-radius: 8px;
@@ -183,7 +184,7 @@ button.active {
 
 .password-wrapper .toggle-password,
 .rpps-wrapper .toggle-password {
-  width: 20%;
+  width: 15%;
   background: none;
   border: none;
   cursor: pointer;
