@@ -42,7 +42,8 @@
 
 <script setup>
 import { ref, watch, computed, defineEmits } from 'vue'
-import { saveUser, getUser } from '../db.js'
+import bcrypt from 'bcryptjs'
+import { saveUser, getUser } from '../db.js' // Ajuste le chemin selon ton projet
 
 const emit = defineEmits(['switch-to-login'])
 
@@ -92,29 +93,41 @@ const isFormValid = computed(() => {
 async function handleSignup() {
   errorMessage.value = ''
 
-  const user = {
-    fullName: fullName.value,
-    firstName: firstName.value,
-    email: email.value,
-    password: password.value,
-    proNumber: showProInput.value ? proNumber.value : null,
-    createdAt: new Date().toISOString(),
-  }
-
-  const existingUser = await getUser(user.email)
+  const existingUser = await getUser(email.value.trim())
   if (existingUser) {
     errorMessage.value = 'Cet email est déjà utilisé.'
     return
   }
 
+  // 🔹 Hashage du mot de passe avant sauvegarde
+  const hashedPassword = await bcrypt.hash(password.value, 10)
+
+  const user = {
+    fullName: fullName.value,
+    firstName: firstName.value,
+    email: email.value,
+    password: hashedPassword,
+    proNumber: showProInput.value ? proNumber.value : null,
+    createdAt: new Date().toISOString(),
+  }
+
   await saveUser(user)
 
   alert('Inscription réussie !')
-
-  // Conserver les champs remplis et revenir au login
   emit('switch-to-login')
+
+  // 🔹 Réinitialiser le formulaire (optionnel si tu veux conserver les valeurs)
+  fullName.value = ''
+  firstName.value = ''
+  email.value = ''
+  password.value = ''
+  showPassword.value = false
+  showProInput.value = false
+  proNumber.value = ''
+  showProPassword.value = false
 }
 </script>
+
 
 <style scoped>
 .form {

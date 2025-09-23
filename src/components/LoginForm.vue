@@ -2,7 +2,9 @@
   <div class="form">
     <input v-model="email" type="email" placeholder="Email" />
     <input v-model="password" type="password" placeholder="Mot de passe" />
+
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+
     <button @click="handleLogin" :disabled="!isFormValid">Se connecter</button>
   </div>
 </template>
@@ -10,6 +12,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import bcrypt from 'bcryptjs'
 import { getUser } from '../db.js'
 
 const router = useRouter()
@@ -23,18 +26,24 @@ async function handleLogin() {
   errorMessage.value = ''
   const user = await getUser(email.value.trim())
 
-  if (!user || user.password !== password.value) {
+  if (!user) {
     errorMessage.value = 'Email ou mot de passe incorrect.'
     return
   }
 
-  // Sauvegarde utilisateur connecté pour session offline
-  localStorage.setItem('currentUser', JSON.stringify(user))
+  // 🔹 Vérification hash
+  const validPassword = await bcrypt.compare(password.value, user.password)
+  if (!validPassword) {
+    errorMessage.value = 'Email ou mot de passe incorrect.'
+    return
+  }
 
+  localStorage.setItem('currentUser', JSON.stringify(user))
   alert(`Bienvenue ${user.firstName} !`)
   router.push('/dashboard')
 }
 </script>
+
 
 <style scoped>
 .form {
