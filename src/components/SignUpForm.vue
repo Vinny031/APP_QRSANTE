@@ -25,12 +25,15 @@
         <input
           v-model="proNumber"
           :type="showProPassword ? 'text' : 'password'"
-          placeholder="Ajoute ton RPPS (11 chiffres)"
+          placeholder="Ajoute ton RPPS"
           @input="proNumber = proNumber.replace(/\D/g, '').slice(0, 11)"
         />
         <button type="button" @click="showProPassword = !showProPassword" class="toggle-password">
           <i :class="showProPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
         </button>
+      </div>
+      <div class="rpps-error" v-if="showProInput && proNumber && proNumber.length !== 11">
+        Le RPPS est composé de 11 chiffres.
       </div>
     </div>
 
@@ -43,7 +46,7 @@
 <script setup>
 import { ref, watch, computed, defineEmits } from 'vue'
 import bcrypt from 'bcryptjs'
-import { saveUser, getUser } from '../db.js' // Ajuste le chemin selon ton projet
+import { saveUser, getUser } from '../db.js'
 
 const emit = defineEmits(['switch-to-login'])
 
@@ -80,13 +83,15 @@ function validateEmail(mail) {
   return regex.test(mail)
 }
 
+// Bouton actif seulement si tout est correct
 const isFormValid = computed(() => {
+  const rp = !showProInput.value || proNumber.value.length === 11
   return (
     fullName.value.trim().length > 1 &&
     firstName.value.trim().length > 1 &&
     validateEmail(email.value) &&
     validatePassword(password.value) &&
-    (!showProInput.value || proNumber.value.length === 11)
+    rp
   )
 })
 
@@ -99,7 +104,6 @@ async function handleSignup() {
     return
   }
 
-  // 🔹 Hashage du mot de passe avant sauvegarde
   const hashedPassword = await bcrypt.hash(password.value, 10)
 
   const user = {
@@ -116,7 +120,7 @@ async function handleSignup() {
   alert('Inscription réussie !')
   emit('switch-to-login')
 
-  // 🔹 Réinitialiser le formulaire (optionnel si tu veux conserver les valeurs)
+  // Réinitialiser le formulaire
   fullName.value = ''
   firstName.value = ''
   email.value = ''
@@ -127,7 +131,6 @@ async function handleSignup() {
   showProPassword.value = false
 }
 </script>
-
 
 <style scoped>
 .form {
@@ -142,6 +145,7 @@ async function handleSignup() {
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 .form button {
   width: 100%;
@@ -171,18 +175,22 @@ async function handleSignup() {
   border: 1px solid #ccc;
   border-radius: 8px;
   width: 100%;
+  min-height: 40px; /* fixe la hauteur pour éviter les sauts */
 }
+
 .password-wrapper input,
 .rpps-wrapper input {
-  width: 80%;
+  width: calc(100% - 40px); /* prend toute la largeur moins le bouton */
   padding: 0 8px;
   border: none;
   outline: none;
   border-radius: 0;
+  box-sizing: border-box;
 }
+
 .password-wrapper .toggle-password,
 .rpps-wrapper .toggle-password {
-  width: 15%;
+  width: 40px; /* fixe la largeur */
   background: none;
   border: none;
   cursor: pointer;
@@ -192,10 +200,13 @@ async function handleSignup() {
   justify-content: center;
   align-items: center;
 }
-.password-error {
+
+.password-error,
+.rpps-error {
   color: red;
   font-size: 12px;
   margin-top: 5px;
   text-align: left;
+  width: 95%;
 }
 </style>
