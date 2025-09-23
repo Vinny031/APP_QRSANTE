@@ -17,6 +17,7 @@
       <input type="text" placeholder="Nom complet" />
       <input type="text" placeholder="Prenom" />
       <input type="email" placeholder="Email" />
+
       <div class="password-wrapper">
         <input
           :type="showPassword ? 'text' : 'password'"
@@ -27,6 +28,7 @@
           <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
         </button>
       </div>
+      <div class="password-error" v-if="passwordError">{{ passwordError }}</div>
 
       <button type="button" @click="showProInput = !showProInput">
         Professionnel de santé ?
@@ -54,7 +56,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from './Header.vue'
 
@@ -66,12 +68,31 @@ const errorMessage = ref('')
 
 const password = ref('')
 const showPassword = ref(false)
+const passwordError = ref('')
 const showProPassword = ref(false)
 
 // Connexion simple
 function handleLogin() {
   router.push('/dashboard')
 }
+
+// Fonction de validation du mot de passe
+function validatePassword(pw) {
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/
+  return regex.test(pw)
+}
+
+// Regard sur le password pour afficher une erreur en temps réel
+watch(password, (newVal) => {
+  if (newVal.length === 0) {
+    passwordError.value = ''
+  } else if (!validatePassword(newVal)) {
+    passwordError.value =
+      'Minimum 12 caractères, avec majuscule, minuscule, chiffre et caractères spéciaux.'
+  } else {
+    passwordError.value = ''
+  }
+})
 
 // Inscription avec validation RPPS
 function handleSignup() {
@@ -173,5 +194,12 @@ button.active {
   align-items: center;
   padding: 0;
   margin: 0;
+}
+
+.password-error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
 }
 </style>
