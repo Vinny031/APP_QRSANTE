@@ -7,9 +7,6 @@
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
 
     <button @click="handleLogin" :disabled="!isFormValid">Se connecter</button>
-    <button type="button" @click="emit('switch-to-signup')">
-      Pas encore de compte ? S'inscrire
-    </button>
   </div>
 </template>
 
