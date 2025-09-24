@@ -1,72 +1,79 @@
 <template>
-  <div class="dashboard">
-    <Header />
-    <h2>Bienvenue sur votre espace QR Santé</h2>
+    <div class="dashboard">
+        <Header />
+        <h2>Bienvenue sur votre espace QR Santé</h2>
 
-    <div v-if="!hasMedicalData" class="centered-content">
-      <p>Aucune donnée médicale n'a été renseignée.</p>
-      <button @click="openDataForm">Remplir vos données</button>
+        <div v-if="!hasMedicalData" class="centered-content">
+            <p>Aucune donnée médicale n'a été renseignée.</p>
+            <button @click="openDataForm">Remplir vos données</button>
+        </div>
+
+        <div v-else class="patient-data-section">
+            <div v-if="patientData.email" class="user-info-section">
+                <p class="user-name">Bonjour, {{ patientData.firstName }} {{ patientData.fullName }}</p>
+                <p class="user-email">E-mail : {{ patientData.email }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Données personnelles</h3>
+                <ul>
+                    <li v-if="patientData.birthplace">Lieu de naissance : {{ patientData.birthplace }}</li>
+                    <li v-if="patientData.birthDepartment">Département de naissance : {{ patientData.birthDepartment }}</li>
+                    <li v-if="patientData.currentAddress">Adresse actuelle : {{ patientData.currentAddress }}</li>
+                    <li v-if="patientData.birthDate">Date de naissance : {{ patientData.birthDate }}</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Données médicales</h3>
+                <h4>Vitales</h4>
+                <ul>
+                    <li v-if="patientData.bloodType">Groupe sanguin : {{ patientData.bloodType }}</li>
+                    <li v-if="patientData.allergies">Allergies : {{ patientData.allergies }}</li>
+                    <li v-if="patientData.hasPacemaker === true">Pacemaker : Oui</li>
+                    <li v-if="patientData.hasPacemaker === false">Pacemaker : Non</li>
+                    <li v-if="patientData.organDonation === true">Don d'organes : Oui</li>
+                    <li v-if="patientData.organDonation === false">Don d'organes : Non</li>
+                </ul>
+                <h4>Autres</h4>
+                <ul>
+                    <li v-if="patientData.medicalEquipment">Matériel médical : {{ patientData.medicalEquipment }}</li>
+                    <li v-if="patientData.chronicDiseases">Maladies chroniques : {{ patientData.chronicDiseases }}</li>
+                    <li v-if="patientData.medicalHistory">Antécédents médicaux : {{ patientData.medicalHistory }}</li>
+                    <li v-if="patientData.currentTreatments">Traitements en cours : {{ patientData.currentTreatments }}</li>
+                    <li v-if="patientData.medicalExams">Examens médicaux : {{ patientData.medicalExams }}</li>
+                    <li v-if="patientData.advanceDirectives">Directives anticipées : {{ patientData.advanceDirectives }}</li>
+                    <li v-if="patientData.vaccinations">Vaccinations : {{ patientData.vaccinations }}</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Contacts</h3>
+                <ul>
+                    <li v-if="patientData.attendingPhysician">Médecin traitant : {{ patientData.attendingPhysician }}</li>
+                    <li v-if="patientData.physicianPhone">Numéro du médecin traitant : {{ patientData.physicianPhone }}</li>
+                    <li v-if="patientData.emergencyContacts">Contacts d'urgence : {{ patientData.emergencyContacts }}</li>
+                    <li v-if="patientData.emergencyContactPhone">Numéro du contact d'urgence : {{ patientData.emergencyContactPhone }}</li>
+                </ul>
+            </div>
+
+            <div class="action-buttons">
+                <button @click="openDataForm">Modifier les données</button>
+                <button @click="generateQRCode">Afficher le QR Code</button>
+
+                <PractitionerButton 
+                    v-if="patientData && patientData.proNumber" 
+                    :proNumber="patientData.proNumber" 
+                />
+            </div>
+        </div>
+
+        <Footer />
     </div>
-
-    <div v-else class="card-container">
-      <div class="user-info-section">
-        <p class="user-name">Bonjour, {{ patientData.firstName }} {{ patientData.fullName }}</p>
-      </div>
-
-      <div class="card">
-        <h3>Données personnelles</h3>
-        <ul>
-          <li v-if="patientData.birthplace">Lieu de naissance : {{ patientData.birthplace }}</li>
-          <li v-if="patientData.birthDepartment">Département de naissance : {{ patientData.birthDepartment }}</li>
-          <li v-if="patientData.currentAddress">Adresse actuelle : {{ patientData.currentAddress }}</li>
-          <li v-if="patientData.birthDate">Date de naissance : {{ patientData.birthDate }}</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Données médicales</h3>
-        <h4>Vitales</h4>
-        <ul>
-          <li v-if="patientData.bloodType">Groupe sanguin : {{ patientData.bloodType }}</li>
-          <li v-if="patientData.allergies">Allergies : {{ patientData.allergies }}</li>
-          <li v-if="patientData.hasPacemaker !== undefined">Pacemaker : {{ patientData.hasPacemaker ? 'Oui' : 'Non' }}</li>
-          <li v-if="patientData.organDonation !== undefined">Don d'organes : {{ patientData.organDonation ? 'Oui' : 'Non' }}</li>
-        </ul>
-
-        <h4>Autres</h4>
-        <ul>
-          <li v-if="patientData.medicalEquipment">Matériel médical : {{ patientData.medicalEquipment }}</li>
-          <li v-if="patientData.chronicDiseases">Maladies chroniques : {{ patientData.chronicDiseases }}</li>
-          <li v-if="patientData.medicalHistory">Antécédents médicaux : {{ patientData.medicalHistory }}</li>
-          <li v-if="patientData.currentTreatments">Traitements en cours : {{ patientData.currentTreatments }}</li>
-          <li v-if="patientData.medicalExams">Examens médicaux : {{ patientData.medicalExams }}</li>
-          <li v-if="patientData.advanceDirectives">Directives anticipées : {{ patientData.advanceDirectives }}</li>
-          <li v-if="patientData.vaccinations">Vaccinations : {{ patientData.vaccinations }}</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Contacts</h3>
-        <ul>
-          <li v-if="patientData.attendingPhysician">Médecin traitant : {{ patientData.attendingPhysician }}</li>
-          <li v-if="patientData.physicianPhone">Numéro du médecin traitant : {{ patientData.physicianPhone }}</li>
-          <li v-if="patientData.emergencyContacts">Contacts d'urgence : {{ patientData.emergencyContacts }}</li>
-          <li v-if="patientData.emergencyContactPhone">Numéro du contact d'urgence : {{ patientData.emergencyContactPhone }}</li>
-        </ul>
-      </div>
-
-      <div class="action-buttons">
-        <button @click="openDataForm">Modifier les données</button>
-        <button @click="generateQRCode">Afficher le QR Code</button>
-        <PractitionerButton v-if="users?.proNumber" :proNumber="users.proNumber" />
-      </div>
-    </div>
-
-    <Footer />
-  </div>
 </template>
 
 <script setup>
+import { ref, onMounted, computed, watch } from 'vue';
 import { ref, onMounted, computed, watch } from 'vue';
 import Header from './Header.vue';
 import Footer from './Footer.vue';
@@ -76,74 +83,61 @@ import { getUser } from '../db.js';
 
 const router = useRouter();
 const route = useRoute();
-const patientData = ref(null);
-const users = ref(null);
 
-// Récupération des données utilisateur depuis IndexedDB
-const fetchUserFromIndexedDB = async () => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('MyAppDB', 1);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => {
-      const db = request.result;
-      const objectStoreName = db.objectStoreNames.contains('users') ? 'users' : db.objectStoreNames[0];
-      if (!objectStoreName) return resolve(null);
-      const transaction = db.transaction([objectStoreName], 'readonly');
-      const store = transaction.objectStore(objectStoreName);
-      const cursorRequest = store.openCursor();
-      cursorRequest.onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) {
-          if (cursor.value?.proNumber) resolve(cursor.value);
-          else cursor.continue();
-        } else resolve(null);
-      };
-      cursorRequest.onerror = () => reject(cursorRequest.error);
-    };
-  });
-};
+const patientData = ref(null);
 
 const fetchPatientData = async () => {
-  const currentUserEmail = localStorage.getItem('currentUserEmail');
-  if (!currentUserEmail) return;
-  const userData = await getUser(currentUserEmail);
-  const storedMedicalData = JSON.parse(localStorage.getItem('patientMedicalData') || '{}');
-  patientData.value = { ...userData, ...storedMedicalData };
+    const currentUserEmail = localStorage.getItem('currentUserEmail');
+
+    if (currentUserEmail) {
+        const userData = await getUser(currentUserEmail);
+        const storedMedicalData = localStorage.getItem('patientMedicalData');
+        const medicalData = storedMedicalData ? JSON.parse(storedMedicalData) : {};
+        patientData.value = { ...userData, ...medicalData };
+    }
 };
 
 const hasMedicalData = computed(() => {
-  if (!patientData.value) return false;
-  const medicalFields = [
-    'birthplace', 'birthDepartment', 'currentAddress', 'birthDate', 'bloodType',
-    'allergies', 'hasPacemaker', 'organDonation', 'medicalEquipment',
-    'chronicDiseases', 'medicalHistory', 'currentTreatments',
-    'medicalExams', 'advanceDirectives', 'vaccinations',
-    'attendingPhysician', 'physicianPhone', 'emergencyContacts', 'emergencyContactPhone'
-  ];
-  return medicalFields.some(f => patientData.value[f] !== null && patientData.value[f] !== undefined && patientData.value[f] !== '');
+    if (!patientData.value) {
+        return false;
+    }
+    const medicalFields = [
+        'birthplace', 'birthDepartment', 'currentAddress', 'birthDate',
+        'bloodType', 'allergies', 'hasPacemaker', 'organDonation',
+        'medicalEquipment', 'chronicDiseases', 'medicalHistory',
+        'currentTreatments', 'medicalExams', 'advanceDirectives',
+        'vaccinations', 'attendingPhysician', 'physicianPhone',
+        'emergencyContacts', 'emergencyContactPhone'
+    ];
+    return medicalFields.some(field => patientData.value[field] !== null && patientData.value[field] !== undefined && patientData.value[field] !== '');
 });
 
 const openDataForm = () => router.push('/form');
 const generateQRCode = () => router.push('/qrcode');
 
 onMounted(async () => {
-  await fetchPatientData();
-  users.value = await fetchUserFromIndexedDB();
+    fetchPatientData();
 });
 
-watch(() => route.path, (newPath) => {
-  if (newPath === '/dashboard') fetchPatientData();
-}, { immediate: true });
+watch(
+    () => route.path,
+    (newPath) => {
+        if (newPath === '/dashboard') {
+            fetchPatientData();
+        }
+    },
+    { immediate: true }
+);
 </script>
 
 <style scoped>
 .dashboard {
-  width: 100%;
-  padding: 15px;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  box-sizing: border-box;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    border-radius: 10px;
 }
 
 h2, h3, h4 {
@@ -174,26 +168,28 @@ h2, h3, h4 {
   margin: 0;
 }
 
-.centered-content {
-  text-align: center;
-  padding: 20px;
+.patient-data-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    overflow-wrap: break-word;
 }
 
-.card-container {
-  width: 100%;
-  max-width: 450px;
+.centered-content {
+    text-align: center;
+    padding: 20px;
 }
 
 .card {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 15px;
-  margin: 15px 0;
-  background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  width: 100%;
-  box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    width: 100%;
 }
 
 ul {
@@ -235,10 +231,5 @@ li:last-child {
 
 .action-buttons button:hover {
   background: #1a4a8d;
-}
-
-.patient-data-section {
-  width: 100%;
-  overflow-wrap: break-word;
 }
 </style>
