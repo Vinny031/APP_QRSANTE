@@ -7,15 +7,31 @@
         <div class="form">
             <div class="form-row">
                 <label for="birthDate">Date de naissance</label>
-                <input type="date" id="birthDate" v-model="patientData.birthDate" />
+                <input
+                    type="text"
+                    id="birthDate"
+                    v-model="patientData.birthDate"
+                    placeholder="JJ/MM/AAAA"
+                    @input="formatDate"
+                />
             </div>
             <div class="form-row">
                 <label for="birthplace">Lieu de naissance</label>
-                <input type="text" id="birthplace" v-model="patientData.birthplace" />
+                <input
+                    type="text"
+                    id="birthplace"
+                    v-model="patientData.birthplace"
+                    @input="patientData.birthplace = patientData.birthplace.toUpperCase()"
+                />
             </div>
             <div class="form-row">
                 <label for="birthDepartment">Département de naissance</label>
-                <input type="text" id="birthDepartment" v-model="patientData.birthDepartment" />
+                <select id="birthDepartment" v-model="patientData.birthDepartment">
+                    <option disabled value="">-- Sélectionnez un département --</option>
+                    <option v-for="dep in departements" :key="dep.id" :value="dep.id">
+                        {{ dep.id }} - {{ dep.name }}
+                    </option>
+                </select>
             </div>
             <div class="form-row">
                 <label for="currentAddress">Adresse actuelle</label>
@@ -29,34 +45,47 @@
             <div class="card">
                 <h4>Les essentielles :</h4>
                 <div class="form-row">
-                    <label for="hasPacemaker">Pacemaker ?</label>
-                    <div class="options">
-                        <input type="radio" id="pacemaker-yes" name="pacemaker" value="true" v-model="patientData.hasPacemaker" />
-                        <label for="pacemaker-yes">Oui</label>
-                        <input type="radio" id="pacemaker-no" name="pacemaker" value="false" v-model="patientData.hasPacemaker" />
-                        <label for="pacemaker-no">Non</label>
+                    <label>Pacemaker ?</label>
+                    <div class="radio-group">
+                        <label>
+                        <span>Oui</span>
+                        <input type="radio" name="pacemaker" value="true" v-model="patientData.hasPacemaker" />
+                        </label>
+                        <label>
+                        <span>Non</span>
+                        <input type="radio" name="pacemaker" value="false" v-model="patientData.hasPacemaker" />
+                        </label>
                     </div>
-                </div>
-                
-                <div class="form-row">
-                    <label for="organDonation">Don d'organes ?</label>
-                    <div class="options">
-                        <input type="radio" id="organ-yes" name="organDonation" value="true" v-model="patientData.organDonation" />
-                        <label for="organ-yes">Oui</label>
-                        <input type="radio" id="organ-no" name="organDonation" value="false" v-model="patientData.organDonation" />
-                        <label for="organ-no">Non</label>
                     </div>
-                </div>
 
-                <div class="form-row">
-                    <label for="allergiesKnown">Allergies connues ?</label>
-                    <div class="options">
-                        <input type="radio" id="allergies-yes" name="allergies" value="true" v-model="patientData.allergiesKnown" />
-                        <label for="allergies-yes">Oui</label>
-                        <input type="radio" id="allergies-no" name="allergies" value="false" v-model="patientData.allergiesKnown" />
-                        <label for="allergies-no">Non</label>
+                    <div class="form-row">
+                    <label>Don d'organes ?</label>
+                    <div class="radio-group">
+                        <label>
+                        <span>Oui</span>
+                        <input type="radio" name="organDonation" value="true" v-model="patientData.organDonation" />
+                        </label>
+                        <label>
+                        <span>Non</span>
+                        <input type="radio" name="organDonation" value="false" v-model="patientData.organDonation" />
+                        </label>
                     </div>
-                </div>
+                    </div>
+
+                    <div class="form-row">
+                    <label>Allergies connues ?</label>
+                    <div class="radio-group">
+                        <label>
+                        <span>Oui</span>
+                        <input type="radio" name="allergiesKnown" value="true" v-model="patientData.allergiesKnown" />
+                        </label>
+                        <label>
+                        <span>Non</span>
+                        <input type="radio" name="allergiesKnown" value="false" v-model="patientData.allergiesKnown" />
+                        </label>
+                    </div>
+                    </div>
+
 
                 <div class="form-row">
                     <label for="allergies">Allergies</label>
@@ -139,11 +168,13 @@
 <script setup>
 import { reactive, onMounted } from 'vue';
 import Header from './Header.vue';
+import departements from "../assets/data/departements.json";
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 const patientData = reactive({
+    birthDate: null,
     birthplace: null,
     birthDepartment: null,
     currentAddress: null,
@@ -178,6 +209,23 @@ function validate() {
     console.log("Données sauvegardées : ", patientData);
     router.push('/dashboard'); 
 }
+
+function formatDate(e) {
+  // Seulement les chiffres
+  let val = e.target.value.replace(/\D/g, '');
+
+  // Limite de 8 chiffres (JJMMAAAA)
+  if (val.length > 8) val = val.slice(0, 8);
+
+  // Ajout des / automatiquement
+  if (val.length >= 5) {
+    val = val.slice(0,2) + '/' + val.slice(2,4) + '/' + val.slice(4);
+  } else if (val.length >= 3) {
+    val = val.slice(0,2) + '/' + val.slice(2);
+  }
+  patientData.birthDate = val;
+}
+
 </script>
 
 <style scoped>
@@ -186,75 +234,71 @@ function validate() {
 }
 
 .dashboard {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 20px;
-    text-align: left; 
+    width: 100%;
+    padding: 15px;
+    text-align: left;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
-    border-radius: 10px;
 }
 
 h2, h3 {
     color: #183473;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: center;
+    font-size: 18px;
 }
 
 .form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
 }
 
 .form-row {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     width: 100%;
 }
 
 .form-row label {
-    flex-basis: 40%;
-    flex-shrink: 0;
-    font-weight: bold;
-    color: #555;
-    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
 }
 
 .form-row input,
 .form-row select {
-    flex-basis: 55%;
-    flex-grow: 1;
-    padding: 10px;
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
     border-radius: 8px;
     border: 1px solid #ddd;
-    box-sizing: border-box;
 }
 
-/* Style corrigé pour les groupes de boutons radio */
 .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radio-group label {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    gap: 8px;
+    cursor: pointer;
 }
 
-.radio-group .options {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
 
 .card {
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 20px;
-    margin: 20px 0;
+    padding: 15px;
+    margin: 15px 0;
     background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: left;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     width: 100%;
 }
 
@@ -262,19 +306,19 @@ h2, h3 {
     margin-top: 0;
     color: #183473;
     text-align: center;
+    font-size: 16px;
 }
 
 button {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     background: #183473;
-    color: white;
+    color: #fff;
     border: none;
-    cursor: pointer;
     border-radius: 10px;
-    margin-top: 20px;
     font-size: 16px;
-    transition: background 0.3s;
+    cursor: pointer;
+    margin-top: 15px;
 }
 
 button:hover {
