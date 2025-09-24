@@ -3,12 +3,14 @@ import HomePage from '../components/HomePage.vue'
 import Dashboard from '../components/Dashboard.vue'
 import Form from '../components/Form.vue'
 import QrCodePage from '../components/QrCodePage.vue'
+import Scanner from '../components/Scanner.vue'
 
 const routes = [
   { path: '/', component: HomePage },
   { path: '/dashboard', component: Dashboard },
   { path: '/form', component: Form },
-  { path: '/qrcode', component: QrCodePage}
+  { path: '/qrcode', component: QrCodePage},
+  { path: '/scanner', component: Scanner}
 ]
 
 const router = createRouter({

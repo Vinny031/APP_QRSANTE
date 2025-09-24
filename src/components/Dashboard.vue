@@ -138,12 +138,12 @@ watch(() => route.path, (newPath) => {
 
 <style scoped>
 .dashboard {
-  width: 100%;
-  padding: 15px;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  box-sizing: border-box;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    border-radius: 10px;
 }
 
 h2, h3, h4 {
@@ -185,15 +185,14 @@ h2, h3, h4 {
 }
 
 .card {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 15px;
-  margin: 15px 0;
-  background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  text-align: left;
-  width: 100%;
-  box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    width: 100%;
 }
 
 ul {

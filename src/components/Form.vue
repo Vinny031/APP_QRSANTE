@@ -246,8 +246,8 @@ h2, h3 {
 .form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    width: 100%;
+    gap: 15px;
+    align-items: flex-start;
 }
 
 .form-row {
