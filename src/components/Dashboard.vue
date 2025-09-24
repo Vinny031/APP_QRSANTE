@@ -10,8 +10,7 @@
 
         <div v-else class="patient-data-section">
             <div v-if="patientData.email" class="user-info-section">
-                <p class="user-name">Bonjour, {{ patientData.firstName }} {{ patientData.fullName }}</p>
-                <p class="user-email">E-mail : {{ patientData.email }}</p>
+                <p class="user-name">🤝 Bonjour, {{ patientData.firstName }} {{ patientData.fullName }} 🤝</p>
             </div>
 
             <div class="card">
@@ -157,9 +156,10 @@ h2, h3, h4 {
 }
 
 .user-info-section .user-name {
-  font-weight: bold;
-  font-size: 1.2em;
-  margin: 0 0 5px 0;
+    color: #183473;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 0 0 5px 0;
 }
 
 .user-info-section .user-email {
