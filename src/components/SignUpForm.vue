@@ -175,12 +175,12 @@ async function handleSignup() {
   border: 1px solid #ccc;
   border-radius: 8px;
   width: 100%;
-  min-height: 40px; /* fixe la hauteur pour éviter les sauts */
+  min-height: 40px;
 }
 
 .password-wrapper input,
 .rpps-wrapper input {
-  width: calc(100% - 40px); /* prend toute la largeur moins le bouton */
+  width: calc(100% - 40px);
   padding: 0 8px;
   border: none;
   outline: none;
@@ -190,7 +190,7 @@ async function handleSignup() {
 
 .password-wrapper .toggle-password,
 .rpps-wrapper .toggle-password {
-  width: 40px; /* fixe la largeur */
+  width: 40px;
   background: none;
   border: none;
   cursor: pointer;
