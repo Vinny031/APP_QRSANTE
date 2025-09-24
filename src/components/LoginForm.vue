@@ -5,8 +5,10 @@
     <input v-model="password" type="password" placeholder="Mot de passe" />
 
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-
-    <button @click="handleLogin" :disabled="!isFormValid">Se connecter</button>
+  <a href="/" class="forgot-password-link">
+    Mot de passe oublié ?
+  </a>
+  <button @click="handleLogin" :disabled="!isFormValid">Se connecter</button>
   </div>
 </template>
 
@@ -39,13 +41,8 @@ async function handleLogin() {
     return
   }
 
-  // Stocke uniquement l'email de l'utilisateur, et non tout l'objet
   localStorage.setItem('currentUserEmail', user.email)
-  
-  // Affiche un message de succès (à remplacer par une modale plus tard)
   alert(`Bienvenue ${user.firstName} !`)
-  
-  // Redirige vers le tableau de bord
   router.push('/dashboard')
 }
 </script>
@@ -86,5 +83,15 @@ async function handleLogin() {
 .error {
   color: red;
   margin-top: 5px;
+}
+
+.forgot-password-link {
+  color: #183473;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+}
+.forgot-password-link:hover {
+  color: #1a4a8d;
 }
 </style>
