@@ -45,6 +45,24 @@
             <div class="card">
                 <h4>Les essentielles :</h4>
                 <div class="form-row">
+                    <label for="hasPacemaker">Pacemaker ?</label>
+                    <div class="options">
+                        <!-- Utilisation de :value pour lier des valeurs booléennes -->
+                        <input type="radio" id="pacemaker-yes" name="pacemaker" :value="true" v-model="patientData.hasPacemaker" />
+                        <label for="pacemaker-yes">Oui</label>
+                        <input type="radio" id="pacemaker-no" name="pacemaker" :value="false" v-model="patientData.hasPacemaker" />
+                        <label for="pacemaker-no">Non</label>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <label for="organDonation">Don d'organes ?</label>
+                    <div class="options">
+                        <!-- Utilisation de :value pour lier des valeurs booléennes -->
+                        <input type="radio" id="organ-yes" name="organDonation" :value="true" v-model="patientData.organDonation" />
+                        <label for="organ-yes">Oui</label>
+                        <input type="radio" id="organ-no" name="organDonation" :value="false" v-model="patientData.organDonation" />
+                        <label for="organ-no">Non</label>
                     <label>Pacemaker ?</label>
                     <div class="radio-group">
                         <label>
@@ -58,6 +76,14 @@
                     </div>
                     </div>
 
+                <div class="form-row">
+                    <label for="allergiesKnown">Allergies connues ?</label>
+                    <div class="options">
+                        <!-- Utilisation de :value pour lier des valeurs booléennes -->
+                        <input type="radio" id="allergies-yes" name="allergies" :value="true" v-model="patientData.allergiesKnown" />
+                        <label for="allergies-yes">Oui</label>
+                        <input type="radio" id="allergies-no" name="allergies" :value="false" v-model="patientData.allergiesKnown" />
+                        <label for="allergies-no">Non</label>
                     <div class="form-row">
                     <label>Don d'organes ?</label>
                     <div class="radio-group">
@@ -182,13 +208,14 @@ const patientData = reactive({
     bloodType: null,
     allergies: null,
     hasPacemaker: false,
+    allergiesKnown: false, // Initialisation
     medicalEquipment: null,
     chronicDiseases: null,
     medicalHistory: null,
     currentTreatments: null,
     medicalExams: null,
     advanceDirectives: null,
-    organDonation: null,
+    organDonation: false, // Initialisation
     vaccinations: null,
     attendingPhysician: null,
     physicianPhone: null,

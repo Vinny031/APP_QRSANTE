@@ -1,20 +1,25 @@
 <template>
   <div class="form">
+    <h2>Se connecter</h2>
     <input v-model="email" type="email" placeholder="Email" />
     <input v-model="password" type="password" placeholder="Mot de passe" />
 
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
 
     <button @click="handleLogin" :disabled="!isFormValid">Se connecter</button>
+    <button type="button" @click="emit('switch-to-signup')">
+      Pas encore de compte ? S'inscrire
+    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, defineEmits } from 'vue'
 import { useRouter } from 'vue-router'
 import bcrypt from 'bcryptjs'
 import { getUser } from '../db.js'
 
+const emit = defineEmits(['switch-to-signup'])
 const router = useRouter()
 const email = ref('')
 const password = ref('')
@@ -31,25 +36,31 @@ async function handleLogin() {
     return
   }
 
-  // 🔹 Vérification hash
   const validPassword = await bcrypt.compare(password.value, user.password)
   if (!validPassword) {
     errorMessage.value = 'Email ou mot de passe incorrect.'
     return
   }
 
-  localStorage.setItem('currentUser', JSON.stringify(user))
+  // Stocke uniquement l'email de l'utilisateur, et non tout l'objet
+  localStorage.setItem('currentUserEmail', user.email)
+  
+  // Affiche un message de succès (à remplacer par une modale plus tard)
   alert(`Bienvenue ${user.firstName} !`)
+  
+  // Redirige vers le tableau de bord
   router.push('/dashboard')
 }
 </script>
-
 
 <style scoped>
 .form {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.form h2 {
+  color: #183473;
 }
 .form input {
   display: block;
@@ -58,6 +69,7 @@ async function handleLogin() {
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 .form button {
   width: 100%;
@@ -73,6 +85,7 @@ async function handleLogin() {
   background: #999;
   cursor: not-allowed;
 }
+
 .error {
   color: red;
   margin-top: 5px;
