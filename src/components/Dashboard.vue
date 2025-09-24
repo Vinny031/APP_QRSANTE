@@ -59,11 +59,13 @@
 
     </div>
   </div>
+  <Footer />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import Header from './Header.vue';
+import Footer from './Footer.vue'
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -91,45 +93,45 @@ fetchPatientData();
 </script>
 
 <style scoped>
-/* Styles de la page */
 .dashboard {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 20px;
+    width: 100%;
+    padding: 15px;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
     border-radius: 10px;
+    box-sizing: border-box;
 }
 
 h2, h3, h4 {
     color: #183473;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: center;
+    font-size: 16px;
 }
 
-/* Styles des cartes et des boutons */
 .card {
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 20px;
-    margin: 20px 0;
+    padding: 15px;
+    margin: 15px 0;
     background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     text-align: left;
     width: 100%;
+    box-sizing: border-box;
 }
 
 ul {
-  list-style-type: none; /* Supprime les puces */
-  padding: 0;
-  margin-top: 20px;
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
 }
 
 li {
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-  font-size: 1.1em;
-  color: #333;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    color: #333;
 }
 
 li:last-child {
@@ -137,26 +139,32 @@ li:last-child {
 }
 
 .action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-  margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 20px;
 }
 
 .action-buttons button {
-    width: auto;
-    padding: 12px 24px;
+    width: 100%;
+    padding: 12px;
     border: none;
     cursor: pointer;
     background: #183473;
     color: white;
     border-radius: 10px;
-    font-size: 16px;
+    font-size: 14px;
     transition: background 0.3s;
 }
 
 .action-buttons button:hover {
     background: #1a4a8d;
 }
+
+.patient-data-section {
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
 </style>
