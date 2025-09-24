@@ -74,7 +74,6 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { ref, onMounted, computed, watch } from 'vue';
 import Header from './Header.vue';
 import Footer from './Footer.vue';
 import PractitionerButton from './PractitionerButton.vue';
