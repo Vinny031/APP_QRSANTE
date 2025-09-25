@@ -109,14 +109,15 @@
     <button @click="startScanning" v-if="!scanning && !scannedData">Lancer le scan</button>
     <button @click="goBack" class="back-button">Retour au tableau de bord</button>
   </div>
+  <Footer />
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import Header from './Header.vue';
+import Footer from './Footer.vue';
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { decryptData } from './encryption';
-import Dashboard from './Dashboard.vue';
 import { useRouter } from 'vue-router';
 
 // Initialisation du routeur
