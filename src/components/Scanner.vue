@@ -116,6 +116,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import Header from './Header.vue';
 import Footer from './Footer.vue';
+import { Camera } from '@capacitor/camera';
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { decryptData } from './encryption';
 import { useRouter } from 'vue-router';
@@ -127,12 +128,13 @@ const scannedData = ref(null);
 const html5QrcodeScanner = ref(null);
 const scanning = ref(false);
 
+// Gestion du retour
 const goBack = () => {
   router.push('/dashboard');
 };
 
+// --- Gestion du scanner ---
 const onScanSuccess = (decodedText, decodedResult) => {
-  // Arrêter le scanner s'il est actif
   if (html5QrcodeScanner.value && typeof html5QrcodeScanner.value.clear === 'function') {
     html5QrcodeScanner.value.clear().then(() => {
       scanning.value = false;
@@ -163,7 +165,6 @@ const processScannedData = (decodedText) => {
 };
 
 const onScanError = (errorMessage) => {
-  // Filtrer les erreurs communes qui ne sont pas importantes
   const ignoredErrors = [
     'NotFoundException',
     'No MultiFormat Readers were able to detect the code',
@@ -178,36 +179,45 @@ const onScanError = (errorMessage) => {
   if (!shouldIgnore) {
     console.error("Erreur de scan importante:", errorMessage);
   }
-  // On ne fait rien pour les erreurs normales de détection
 };
 
-const startScanning = () => {
+// --- Gestion de la permission caméra ---
+const requestCameraPermission = async () => {
+  const status = await Camera.requestPermissions();
+  if (status.camera !== 'granted') {
+    alert("La permission caméra est nécessaire pour scanner le QR Code.");
+    return false;
+  }
+  return true;
+};
+
+// --- Lancer le scanner ---
+const startScanning = async () => {
+  const allowed = await requestCameraPermission();
+  if (!allowed) return;
+
   scanning.value = true;
   html5QrcodeScanner.value.render(onScanSuccess, onScanError);
 };
 
 const resetScanner = () => {
   if (html5QrcodeScanner.value) {
-    // Essayer clear d'abord, puis stop si clear n'existe pas
     const stopMethod = html5QrcodeScanner.value.clear || html5QrcodeScanner.value.stop;
     
     if (stopMethod && typeof stopMethod === 'function') {
       stopMethod.call(html5QrcodeScanner.value).then(() => {
         scanning.value = false;
         scannedData.value = null;
-        // Réinitialiser le scanner
         initializeScanner();
         startScanning();
       }).catch(err => {
         console.error("Erreur lors de l'arrêt du scanner :", err);
-        // Même si ça échoue, on peut réessayer
         scanning.value = false;
         scannedData.value = null;
         initializeScanner();
         startScanning();
       });
     } else {
-      // Si aucune méthode d'arrêt n'est disponible, recréer le scanner
       scanning.value = false;
       scannedData.value = null;
       initializeScanner();
@@ -220,8 +230,8 @@ const resetScanner = () => {
   }
 };
 
+// --- Initialisation du scanner ---
 const initializeScanner = () => {
-  // Recréer le scanner à chaque fois
   html5QrcodeScanner.value = new Html5QrcodeScanner(
     "qr-reader",
     { 
@@ -233,7 +243,7 @@ const initializeScanner = () => {
   );
 };
 
-// Computed properties pour l'affichage conditionnel
+// --- Computed pour affichage conditionnel ---
 const hasEmergencyInfo = computed(() => {
   if (!scannedData.value) return false;
   return scannedData.value.bloodType || 
@@ -264,11 +274,11 @@ const hasContactInfo = computed(() => {
 
 const isQRCodeExpired = computed(() => {
   if (!scannedData.value || !scannedData.value.timestamp) return false;
-  const fourHours = 4 * 60 * 60 * 1000; // 4 heures en millisecondes
+  const fourHours = 4 * 60 * 60 * 1000;
   return (Date.now() - scannedData.value.timestamp) > fourHours;
 });
 
-// Utilitaires
+// --- Utilitaires ---
 const formatDate = (dateString) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('fr-FR');
@@ -292,7 +302,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (html5QrcodeScanner.value) {
-    // Essayer toutes les méthodes possibles pour arrêter le scanner
     const stopMethod = html5QrcodeScanner.value.clear || 
                       html5QrcodeScanner.value.stop || 
                       html5QrcodeScanner.value.destroy;
