@@ -86,7 +86,6 @@ function validateEmail(mail) {
   return regex.test(mail)
 }
 
-// Bouton actif seulement si tout est correct
 const isFormValid = computed(() => {
   const rp = !showProInput.value || proNumber.value.length === 11
   return (
@@ -98,8 +97,7 @@ const isFormValid = computed(() => {
   )
 })
 
-// Vérification RPPS via l'API eSanté
-// Message générique si échec pour masquer la raison exacte
+// Vérification RPPS via l'API eSanté et ajout d'un message générique si échec pour masquer la raison exacte
 async function validateRPPS(rpps, fullNameInput, firstNameInput) {
   try {
     const response = await fetch(
@@ -192,34 +190,25 @@ async function handleSignup() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 20px;
-}
-.form input {
-  display: block;
-  width: 95%;
-  margin: 10px 0;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 400px;
+  padding: 0 10px;
   box-sizing: border-box;
 }
+
+.form input,
 .form button {
   width: 100%;
+  min-height: 40px;
   padding: 10px;
-  background: #183473;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
-  margin-top: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
 }
-.form button:disabled {
-  background: #999;
-  cursor: not-allowed;
-}
-.collapse {
-  margin-top: 10px;
-}
+
 .password-wrapper,
 .rpps-wrapper {
   display: flex;
@@ -228,19 +217,24 @@ async function handleSignup() {
   border-radius: 8px;
   width: 100%;
   min-height: 40px;
-}
-.password-wrapper input,
-.rpps-wrapper input {
-  width: calc(100% - 40px);
-  padding: 0 8px;
-  border: none;
-  outline: none;
-  border-radius: 0;
   box-sizing: border-box;
 }
+
+.password-wrapper input,
+.rpps-wrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
 .password-wrapper .toggle-password,
 .rpps-wrapper .toggle-password {
   width: 40px;
+  height: 100%;
   background: none;
   border: none;
   cursor: pointer;
@@ -251,11 +245,45 @@ async function handleSignup() {
   align-items: center;
 }
 
+.collapse {
+  margin-top: 10px;
+}
+
 .error-message {
   color: red;
   font-size: 12px;
   margin-top: 5px;
   text-align: left;
-  width: 95%;
+  width: 100%;
 }
+
+.form button {
+  background: #183473;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.form button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+@media (max-width: 360px) {
+  .form input,
+  .form button {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .password-wrapper input,
+  .rpps-wrapper input {
+    font-size: 13px;
+  }
+}
+
 </style>
