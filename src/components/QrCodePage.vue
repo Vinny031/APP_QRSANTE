@@ -8,7 +8,7 @@
       <qrcode-vue
         :value="encryptedData"
         :size="300"
-        level="H"
+        level="M"
         :foreground="'#183473'"
         ref="qrcodeRef"
       ></qrcode-vue>
