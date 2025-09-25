@@ -41,14 +41,12 @@
 
     <button @click="handleSignup" :disabled="!isFormValid">S’inscrire</button>
   </div>
-  
 </template>
 
 <script setup>
 import { ref, watch, computed, defineEmits } from 'vue'
 import bcrypt from 'bcryptjs'
 import { saveUser, getUser } from '../db.js'
-import Footer from './Footer.vue';
 
 const emit = defineEmits(['switch-to-login'])
 
@@ -97,16 +95,66 @@ const isFormValid = computed(() => {
   )
 })
 
-async function handleSignup() {
-  errorMessage.value = ''
+// Vérification RPPS via l'API eSanté et comparaison nom/prénom
+async function validateRPPS(rpps, fullNameInput, firstNameInput) {
+  try {
+    const response = await fetch(
+      `https://gateway.api.esante.gouv.fr/fhir/v2/Practitioner?identifier=${rpps}`,
+      {
+        method: 'GET',
+        headers: {
+          'ESANTE-API-KEY': '4e2accac-2801-40c0-ab1e-a3e780bdca22',
+          'Accept': 'application/fhir+json',
+        },
+      }
+    );
 
-  const existingUser = await getUser(email.value.trim())
-  if (existingUser) {
-    errorMessage.value = 'Cet email est déjà utilisé.'
-    return
+    if (!response.ok) {
+      throw new Error('Erreur lors de la requête RPPS');
+    }
+
+    const data = await response.json();
+
+    if (!data.total || data.total === 0) return { valid: false, message: 'RPPS invalide' };
+
+    const practitioner = data.entry[0].resource;
+    const apiLastName = practitioner.name[0].family.toLowerCase();
+    const apiFirstName = practitioner.name[0].given[0].toLowerCase();
+
+    if (
+      apiLastName !== fullNameInput.trim().toLowerCase() ||
+      apiFirstName !== firstNameInput.trim().toLowerCase()
+    ) {
+      return { valid: false, message: 'Le nom ou le prénom ne correspond pas au RPPS' };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    console.error(error);
+    return { valid: false, message: 'Erreur lors de la vérification RPPS' };
+  }
+}
+
+// Gestion de l'inscription
+async function handleSignup() {
+  errorMessage.value = '';
+
+  // Vérification RPPS si champ visible
+  if (showProInput.value) {
+    const rppsResult = await validateRPPS(proNumber.value, fullName.value, firstName.value);
+    if (!rppsResult.valid) {
+      errorMessage.value = rppsResult.message;
+      return;
+    }
   }
 
-  const hashedPassword = await bcrypt.hash(password.value, 10)
+  const existingUser = await getUser(email.value.trim());
+  if (existingUser) {
+    errorMessage.value = 'Cet email est déjà utilisé.';
+    return;
+  }
+
+  const hashedPassword = await bcrypt.hash(password.value, 10);
 
   const user = {
     fullName: fullName.value,
@@ -117,10 +165,10 @@ async function handleSignup() {
     createdAt: new Date().toISOString(),
   }
 
-  await saveUser(user)
+  await saveUser(user);
 
-  alert('Inscription réussie !')
-  emit('switch-to-login')
+  alert('Inscription réussie !');
+  emit('switch-to-login');
 
   // Réinitialiser le formulaire
   fullName.value = ''
