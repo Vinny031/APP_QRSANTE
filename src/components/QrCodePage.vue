@@ -298,11 +298,11 @@ h2 {
 }
 
 p {
+
   color: #555;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-/* QR Code and overlay styles */
 .qr-code-wrapper {
   position: relative;
   width: 300px;
@@ -338,20 +338,19 @@ p {
 }
 
 .info-icons-overlay .icon-group svg {
-  font-size: 2.5em; 
+  font-size: 15px; 
   color: #183473;
 }
 
 .icon-group p {
   margin-top: 5px;
-  font-size: 0.9em;
+  font-size: 15px;
   color: #555;
 }
 
-/* Button styles */
 button {
   width: 100%;
-  max-width: 250px; /* Make button slightly smaller than container */
+  max-width: 250px;
   padding: 12px;
   background: #183473;
   color: white;
