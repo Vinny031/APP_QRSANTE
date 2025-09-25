@@ -34,6 +34,7 @@
     
     <button @click="goBack" class="back-button">Retour au tableau de bord</button>
   </div>
+  <Footer />
 </template>
 
 <script setup>
@@ -44,6 +45,7 @@ import { useRouter } from 'vue-router';
 import { encryptData } from './encryption';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import html2canvas from 'html2canvas';
+import Footer from './Footer.vue';
 
 const qrcodeRef = ref(null);
 
