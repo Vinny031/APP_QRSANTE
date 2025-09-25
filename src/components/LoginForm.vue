@@ -10,6 +10,7 @@
   </a>
   <button @click="handleLogin" :disabled="!isFormValid">Se connecter</button>
   </div>
+
 </template>
 
 <script setup>
@@ -17,6 +18,7 @@ import { ref, computed, defineEmits } from 'vue'
 import { useRouter } from 'vue-router'
 import bcrypt from 'bcryptjs'
 import { getUser } from '../db.js'
+import Footer from './Footer.vue';
 
 const emit = defineEmits(['switch-to-signup'])
 const router = useRouter()
@@ -52,6 +54,7 @@ async function handleLogin() {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 20px;
 }
 .form h2 {
   color: #183473;

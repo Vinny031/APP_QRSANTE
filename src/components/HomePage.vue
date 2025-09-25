@@ -24,8 +24,9 @@
         @switch-to-login="activeTab = 'login'"
       />
     </main>
-    <Footer />
+    
   </div>
+  <Footer />
 </template>
 
 <script setup>

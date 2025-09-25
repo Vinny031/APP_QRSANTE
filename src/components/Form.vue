@@ -150,6 +150,7 @@
 
     <button @click="validate">Valider</button>
   </div>
+  <Footer />
 </template>
 
 <script setup>
@@ -157,6 +158,7 @@ import { reactive, onMounted } from 'vue';
 import Header from './Header.vue';
 import departements from "../assets/data/departements.json";
 import { useRouter } from 'vue-router';
+import Footer from './Footer.vue';
 
 const router = useRouter();
 
