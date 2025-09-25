@@ -14,7 +14,7 @@
         <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
       </button>
     </div>
-    <div class="password-error" v-if="passwordError">{{ passwordError }}</div>
+    <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
 
     <button type="button" @click="showProInput = !showProInput">
       Professionnel de santé ?
@@ -32,12 +32,15 @@
           <i :class="showProPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
         </button>
       </div>
-      <div class="rpps-error" v-if="showProInput && proNumber && proNumber.length !== 11">
-        Le RPPS est composé de 11 chiffres.
+      <div
+        v-if="showProInput && proNumber && proNumber.length !== 11"
+        class="error-message"
+      >
+        Le RPPS doit contenir 11 chiffres.
       </div>
     </div>
 
-    <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
+    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
 
     <button @click="handleSignup" :disabled="!isFormValid">S’inscrire</button>
   </div>
@@ -95,7 +98,8 @@ const isFormValid = computed(() => {
   )
 })
 
-// Vérification RPPS via l'API eSanté et comparaison nom/prénom
+// Vérification RPPS via l'API eSanté
+// Message générique si échec pour masquer la raison exacte
 async function validateRPPS(rpps, fullNameInput, firstNameInput) {
   try {
     const response = await fetch(
@@ -107,54 +111,56 @@ async function validateRPPS(rpps, fullNameInput, firstNameInput) {
           'Accept': 'application/fhir+json',
         },
       }
-    );
+    )
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de la requête RPPS');
-    }
+    if (!response.ok) throw new Error('Erreur API')
 
-    const data = await response.json();
+    const data = await response.json()
 
-    if (!data.total || data.total === 0) return { valid: false, message: 'RPPS invalide' };
+    // Si RPPS inexistant ou nom/prénom ne correspond pas → message générique
+    if (!data.total || data.total === 0) return { valid: false }
 
-    const practitioner = data.entry[0].resource;
-    const apiLastName = practitioner.name[0].family.toLowerCase();
-    const apiFirstName = practitioner.name[0].given[0].toLowerCase();
+    const practitioner = data.entry[0].resource
+    const apiLastName = practitioner.name[0].family.toLowerCase()
+    const apiFirstName = practitioner.name[0].given[0].toLowerCase()
 
     if (
       apiLastName !== fullNameInput.trim().toLowerCase() ||
       apiFirstName !== firstNameInput.trim().toLowerCase()
     ) {
-      return { valid: false, message: 'Le nom ou le prénom ne correspond pas au RPPS' };
+      return { valid: false }
     }
 
-    return { valid: true };
+    return { valid: true }
   } catch (error) {
-    console.error(error);
-    return { valid: false, message: 'Erreur lors de la vérification RPPS' };
+    console.error(error)
+    return { valid: false }
   }
 }
 
 // Gestion de l'inscription
 async function handleSignup() {
-  errorMessage.value = '';
+  errorMessage.value = ''
 
-  // Vérification RPPS si champ visible
   if (showProInput.value) {
-    const rppsResult = await validateRPPS(proNumber.value, fullName.value, firstName.value);
+    const rppsResult = await validateRPPS(
+      proNumber.value,
+      fullName.value,
+      firstName.value
+    )
     if (!rppsResult.valid) {
-      errorMessage.value = rppsResult.message;
-      return;
+      errorMessage.value = 'Le RPPS est invalide ou ne correspond pas à vos informations.'
+      return
     }
   }
 
-  const existingUser = await getUser(email.value.trim());
+  const existingUser = await getUser(email.value.trim())
   if (existingUser) {
-    errorMessage.value = 'Cet email est déjà utilisé.';
-    return;
+    errorMessage.value = 'Cet email est déjà utilisé.'
+    return
   }
 
-  const hashedPassword = await bcrypt.hash(password.value, 10);
+  const hashedPassword = await bcrypt.hash(password.value, 10)
 
   const user = {
     fullName: fullName.value,
@@ -165,12 +171,11 @@ async function handleSignup() {
     createdAt: new Date().toISOString(),
   }
 
-  await saveUser(user);
+  await saveUser(user)
 
-  alert('Inscription réussie !');
-  emit('switch-to-login');
+  alert('Inscription réussie !')
+  emit('switch-to-login')
 
-  // Réinitialiser le formulaire
   fullName.value = ''
   firstName.value = ''
   email.value = ''
@@ -215,10 +220,6 @@ async function handleSignup() {
 .collapse {
   margin-top: 10px;
 }
-.error {
-  color: red;
-  margin-top: 5px;
-}
 .password-wrapper,
 .rpps-wrapper {
   display: flex;
@@ -228,7 +229,6 @@ async function handleSignup() {
   width: 100%;
   min-height: 40px;
 }
-
 .password-wrapper input,
 .rpps-wrapper input {
   width: calc(100% - 40px);
@@ -238,7 +238,6 @@ async function handleSignup() {
   border-radius: 0;
   box-sizing: border-box;
 }
-
 .password-wrapper .toggle-password,
 .rpps-wrapper .toggle-password {
   width: 40px;
@@ -252,8 +251,7 @@ async function handleSignup() {
   align-items: center;
 }
 
-.password-error,
-.rpps-error {
+.error-message {
   color: red;
   font-size: 12px;
   margin-top: 5px;
