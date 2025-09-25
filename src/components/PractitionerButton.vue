@@ -1,11 +1,12 @@
 <template>
-  <button :disabled="!hasProNumber">
+  <button :disabled="!hasProNumber" @click="openScanner">
     <slot>Scanner un QR code</slot>
   </button>
 </template>
 
 <script setup>
 import { defineProps, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps({
   proNumber: {
@@ -14,11 +15,20 @@ const props = defineProps({
   }
 });
 
-// Vérifie que proNumber existe et n'est pas vide
+const router = useRouter();
+
+// Vérification de l'existance d'un proNumber et non vide
 const hasProNumber = computed(() => {
   const result = !!props.proNumber?.trim();
   return result;
 });
+
+// Redirection vers Scanner.vue
+const openScanner = () => {
+  if (hasProNumber.value) {
+    router.push('/scanner');
+  }
+};
 </script>
 
 <style scoped>
