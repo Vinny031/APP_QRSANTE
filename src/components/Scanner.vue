@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import Header from './Header.vue';
 import Footer from './Footer.vue';
 import { Camera } from '@capacitor/camera';
@@ -121,67 +121,15 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import { decryptData } from './encryption';
 import { useRouter } from 'vue-router';
 
-// Initialisation du routeur
 const router = useRouter();
-
 const scannedData = ref(null);
 const html5QrcodeScanner = ref(null);
 const scanning = ref(false);
 
-// Gestion du retour
-const goBack = () => {
-  router.push('/dashboard');
-};
+// --- Gestion du retour ---
+const goBack = () => router.push('/dashboard');
 
-// --- Gestion du scanner ---
-const onScanSuccess = (decodedText, decodedResult) => {
-  if (html5QrcodeScanner.value && typeof html5QrcodeScanner.value.clear === 'function') {
-    html5QrcodeScanner.value.clear().then(() => {
-      scanning.value = false;
-      processScannedData(decodedText);
-    }).catch(err => {
-      console.error("Erreur lors de l'arrêt du scanner :", err);
-      scanning.value = false;
-      processScannedData(decodedText);
-    });
-  } else {
-    scanning.value = false;
-    processScannedData(decodedText);
-  }
-};
-
-const processScannedData = (decodedText) => {
-  try {
-    const decryptedData = decryptData(decodedText);
-    scannedData.value = decryptedData;
-    console.log("Données décryptées :", decryptedData);
-  } catch (error) {
-    console.error("Erreur lors du décryptage :", error);
-    scannedData.value = { 
-      error: "QR Code non valide ou données corrompues", 
-      rawData: decodedText.substring(0, 100) + "..." 
-    };
-  }
-};
-
-const onScanError = (errorMessage) => {
-  const ignoredErrors = [
-    'NotFoundException',
-    'No MultiFormat Readers were able to detect the code',
-    'QR code parse error',
-    'Not found'
-  ];
-  
-  const shouldIgnore = ignoredErrors.some(ignoredError => 
-    errorMessage.includes(ignoredError)
-  );
-  
-  if (!shouldIgnore) {
-    console.error("Erreur de scan importante:", errorMessage);
-  }
-};
-
-// --- Gestion de la permission caméra ---
+// --- Gestion des permissions ---
 const requestCameraPermission = async () => {
   const status = await Camera.requestPermissions();
   if (status.camera !== 'granted') {
@@ -191,86 +139,100 @@ const requestCameraPermission = async () => {
   return true;
 };
 
-// --- Lancer le scanner ---
+// --- Traitement des données scannées ---
+const processScannedData = (decodedText) => {
+  try {
+    scannedData.value = decryptData(decodedText);
+    console.log("Données décryptées :", scannedData.value);
+  } catch (error) {
+    scannedData.value = { 
+      error: "QR Code non valide ou données corrompues", 
+      rawData: decodedText.substring(0, 100) + "..." 
+    };
+    console.error("Erreur lors du décryptage :", error);
+  }
+};
+
+// --- Callbacks du scanner ---
+const onScanSuccess = (decodedText) => {
+  stopScanner().then(() => processScannedData(decodedText));
+};
+
+const onScanError = (errorMessage) => {
+  const ignoredErrors = [
+    'NotFoundException',
+    'No MultiFormat Readers were able to detect the code',
+    'QR code parse error',
+    'Not found'
+  ];
+  if (!ignoredErrors.some(e => errorMessage.includes(e))) {
+    console.error("Erreur de scan importante:", errorMessage);
+  }
+};
+
+// --- Initialisation et rendu du scanner ---
 const startScanning = async () => {
   const allowed = await requestCameraPermission();
   if (!allowed) return;
 
   scanning.value = true;
+
+  // Initialiser seulement ici
+  html5QrcodeScanner.value = new Html5QrcodeScanner(
+    "qr-reader",
+    { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+    false
+  );
+
   html5QrcodeScanner.value.render(onScanSuccess, onScanError);
 };
 
-const resetScanner = () => {
+// --- Arrêt du scanner ---
+const stopScanner = async () => {
   if (html5QrcodeScanner.value) {
     const stopMethod = html5QrcodeScanner.value.clear || html5QrcodeScanner.value.stop;
-    
     if (stopMethod && typeof stopMethod === 'function') {
-      stopMethod.call(html5QrcodeScanner.value).then(() => {
-        scanning.value = false;
-        scannedData.value = null;
-        initializeScanner();
-        startScanning();
-      }).catch(err => {
+      try {
+        await stopMethod.call(html5QrcodeScanner.value);
+      } catch (err) {
         console.error("Erreur lors de l'arrêt du scanner :", err);
-        scanning.value = false;
-        scannedData.value = null;
-        initializeScanner();
-        startScanning();
-      });
-    } else {
-      scanning.value = false;
-      scannedData.value = null;
-      initializeScanner();
-      startScanning();
+      }
     }
-  } else {
-    scannedData.value = null;
-    initializeScanner();
-    startScanning();
+    scanning.value = false;
   }
 };
 
-// --- Initialisation du scanner ---
-const initializeScanner = () => {
-  html5QrcodeScanner.value = new Html5QrcodeScanner(
-    "qr-reader",
-    { 
-      fps: 10, 
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0
-    },
-    false
-  );
+// --- Reset pour scanner un autre QR ---
+const resetScanner = async () => {
+  scannedData.value = null;
+  await stopScanner();
+  startScanning();
 };
 
 // --- Computed pour affichage conditionnel ---
-const hasEmergencyInfo = computed(() => {
-  if (!scannedData.value) return false;
-  return scannedData.value.bloodType || 
-         (scannedData.value.allergies && scannedData.value.allergies !== 'Aucune') ||
-         scannedData.value.hasPacemaker === true ||
-         scannedData.value.organDonation !== undefined;
-});
+const hasEmergencyInfo = computed(() => scannedData.value && (
+  scannedData.value.bloodType || 
+  (scannedData.value.allergies && scannedData.value.allergies !== 'Aucune') ||
+  scannedData.value.hasPacemaker === true ||
+  scannedData.value.organDonation !== undefined
+));
 
-const hasPersonalInfo = computed(() => {
-  if (!scannedData.value) return false;
-  return scannedData.value.birthDate || scannedData.value.birthplace || 
-         scannedData.value.birthDepartment || scannedData.value.currentAddress;
-});
+const hasPersonalInfo = computed(() => scannedData.value && (
+  scannedData.value.birthDate || scannedData.value.birthplace || 
+  scannedData.value.birthDepartment || scannedData.value.currentAddress
+));
 
-const hasOtherMedicalInfo = computed(() => {
-  if (!scannedData.value) return false;
-  return scannedData.value.medicalEquipment || scannedData.value.chronicDiseases ||
-         scannedData.value.medicalHistory || scannedData.value.currentTreatments ||
-         scannedData.value.medicalExams || scannedData.value.advanceDirectives ||
-         scannedData.value.vaccinations;
-});
+const hasOtherMedicalInfo = computed(() => scannedData.value && (
+  scannedData.value.medicalEquipment || scannedData.value.chronicDiseases ||
+  scannedData.value.medicalHistory || scannedData.value.currentTreatments ||
+  scannedData.value.medicalExams || scannedData.value.advanceDirectives ||
+  scannedData.value.vaccinations
+));
 
-const hasContactInfo = computed(() => {
-  if (!scannedData.value) return false;
-  return scannedData.value.attendingPhysician || scannedData.value.physicianPhone ||
-         scannedData.value.emergencyContacts || scannedData.value.emergencyContactPhone;
-});
+const hasContactInfo = computed(() => scannedData.value && (
+  scannedData.value.attendingPhysician || scannedData.value.physicianPhone ||
+  scannedData.value.emergencyContacts || scannedData.value.emergencyContactPhone
+));
 
 const isQRCodeExpired = computed(() => {
   if (!scannedData.value || !scannedData.value.timestamp) return false;
@@ -279,11 +241,7 @@ const isQRCodeExpired = computed(() => {
 });
 
 // --- Utilitaires ---
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('fr-FR');
-};
-
+const formatDate = (dateString) => dateString ? new Date(dateString).toLocaleDateString('fr-FR') : '';
 const getTimeElapsed = () => {
   if (!scannedData.value || !scannedData.value.timestamp) return '';
   const elapsed = Date.now() - scannedData.value.timestamp;
@@ -292,27 +250,8 @@ const getTimeElapsed = () => {
   return `${hours}h ${minutes}min`;
 };
 
-const printInfo = () => {
-  window.print();
-};
-
-onMounted(() => {
-  initializeScanner();
-});
-
-onUnmounted(() => {
-  if (html5QrcodeScanner.value) {
-    const stopMethod = html5QrcodeScanner.value.clear || 
-                      html5QrcodeScanner.value.stop || 
-                      html5QrcodeScanner.value.destroy;
-    
-    if (stopMethod && typeof stopMethod === 'function') {
-      stopMethod.call(html5QrcodeScanner.value).catch(err => 
-        console.error("Erreur lors de l'arrêt du scanner :", err)
-      );
-    }
-  }
-});
+// --- Nettoyage lors de la destruction ---
+onUnmounted(() => stopScanner());
 </script>
 
 <style scoped>
