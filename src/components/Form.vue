@@ -211,11 +211,12 @@ function formatDate(e) {
 }
 
 .dashboard {
-    width: 100%;
-    padding: 15px;
-    text-align: left;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
+    border-radius: 10px;
 }
 
 h2, h3 {
@@ -255,12 +256,14 @@ h2, h3 {
     font-size: 14px;
     border-radius: 8px;
     border: 1px solid #ddd;
+    width: 100%;
 }
 
 .options {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 5px;
+    width: 100%;
 }
 
 .options input[type="radio"] {
