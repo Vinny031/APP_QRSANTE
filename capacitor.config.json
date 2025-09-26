@@ -1,0 +1,21 @@
+{
+  "appId": "com.example.app",
+  "appName": "QR Santé",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Filesystem": {
+      "iosPresentationMode": "fullScreen"
+    },
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}
